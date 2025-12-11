@@ -38,15 +38,25 @@ export const zoomConfig = {
 };
 export type ZoomLevel = keyof typeof zoomConfig;
 
+export type MediaItem = {
+  id: string;
+  start: number;
+  end: number;
+};
+
 interface TimelineStore {
+  play: boolean;
   zoom: ZoomLevel;
-  secondPerPixel: number;
+  playHeadPosition: number;
   setZoom: (zoom: ZoomLevel) => void;
-  setSecondPerPixel: (secondPerPixel: number) => void;
+  setPlay: (play: boolean) => void;
+  setPlayHeadPosition: (playHeadPosition: number) => void;
 }
 export const useTimelineStore = create<TimelineStore>((set) => ({
+  play: false,
   zoom: 3,
-  secondPerPixel: 1,
+  playHeadPosition: 0,
   setZoom: (zoom: ZoomLevel) => set({ zoom }),
-  setSecondPerPixel: (secondPerPixel) => set({ secondPerPixel }),
+  setPlay: (play: boolean) => set({ play }),
+  setPlayHeadPosition: (playHeadPosition: number) => set({ playHeadPosition }),
 }));
