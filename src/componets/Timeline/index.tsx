@@ -137,7 +137,7 @@ export default function Timeline() {
         <input
           type="range"
           min="1"
-          max="5"
+          max="6"
           step="1"
           value={zoom}
           onChange={(e) => setZoom(parseInt(e.target.value) as ZoomLevel)}

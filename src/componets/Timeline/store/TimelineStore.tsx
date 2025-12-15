@@ -6,34 +6,35 @@ export const minTimelineSeconds = 300;
 export const zoomConfig = {
   1: {
     majorTickSeconds: 300,
-    pxPerSecond: function() {
-      return Number((this.majorTickSeconds / zoomPxMultiple).toFixed(2));
-    },
+    totalPX: zoomPxMultiple,
+    pxPerSecond: zoomPxMultiple / 300,
 
   },
   2: {
     majorTickSeconds: 60,
-    pxPerSecond: function() {
-      return Number((this.majorTickSeconds / zoomPxMultiple *2).toFixed(2));
-    },
+    totalPX: zoomPxMultiple * 2,
+    pxPerSecond: zoomPxMultiple * 2 / 60,
   },
   3: {
     majorTickSeconds: 30,
-    pxPerSecond: function() {
-      return Number((this.majorTickSeconds / zoomPxMultiple *3).toFixed(2));
-    },
+    totalPX: zoomPxMultiple * 3,
+    pxPerSecond: zoomPxMultiple * 3 / 30,
   },
   4: {
     majorTickSeconds: 10,
-    pxPerSecond: function() {
-      return Number((this.majorTickSeconds / zoomPxMultiple *4).toFixed(2));
-    },
+    totalPX: zoomPxMultiple * 4,
+    pxPerSecond: zoomPxMultiple * 4 / 10,
   },
+  
   5: {
+    majorTickSeconds: 5,
+    totalPX: zoomPxMultiple * 5,
+    pxPerSecond: zoomPxMultiple * 5 / 5,
+  },
+  6: {
     majorTickSeconds: 1,
-    pxPerSecond: function() {
-      return Number((this.majorTickSeconds / zoomPxMultiple *5).toFixed(2));
-    },
+    totalPX: zoomPxMultiple * 6,
+    pxPerSecond: zoomPxMultiple * 6 / 1,
   },
 };
 export type ZoomLevel = keyof typeof zoomConfig;
@@ -50,13 +51,18 @@ interface TimelineStore {
   playHeadPosition: number;
   setZoom: (zoom: ZoomLevel) => void;
   setPlay: (play: boolean) => void;
-  setPlayHeadPosition: (playHeadPosition: number) => void;
+  setPlayHeadPosition: (playHeadPosition: number | ((prev: number) => number)) => void;
 }
 export const useTimelineStore = create<TimelineStore>((set) => ({
   play: false,
   zoom: 3,
-  playHeadPosition: 0,
+  playHeadPosition: 0,  
   setZoom: (zoom: ZoomLevel) => set({ zoom }),
   setPlay: (play: boolean) => set({ play }),
-  setPlayHeadPosition: (playHeadPosition: number) => set({ playHeadPosition }),
+  setPlayHeadPosition: (playHeadPosition: number | ((prev: number) => number)) => 
+    set((state) => ({
+      playHeadPosition: typeof playHeadPosition === 'function' 
+        ? playHeadPosition(state.playHeadPosition) 
+        : playHeadPosition
+    })),
 }));

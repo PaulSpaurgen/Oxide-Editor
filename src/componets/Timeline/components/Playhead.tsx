@@ -1,35 +1,56 @@
 import { useEffect, useRef, useState } from "react";
-import { useTimelineStore } from "../store/TimelineStore";
+import { useTimelineStore, zoomConfig } from "../store/TimelineStore";
 interface PlayheadProps {
   play: boolean;
   timelineRef: React.RefObject<HTMLDivElement>;
 }
 
 export default function Playhead({ play, timelineRef }: PlayheadProps) {
-  const { playHeadPosition, setPlayHeadPosition, zoom } = useTimelineStore();
-  const animationFrameId = useRef<number>(0);
+  const { zoom, playHeadPosition, setPlayHeadPosition } = useTimelineStore();
+  const rafIdRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number | null>(null);
+
   const [isDragging, setIsDragging] = useState(false);
 
-  const startAnimation = () => {
-    let increment = 0;
-    const animate = () => {
-      increment += 1;
-      setPlayHeadPosition(playHeadPosition + increment);
-      animationFrameId.current = requestAnimationFrame(animate);
-    };
-    animationFrameId.current = requestAnimationFrame(animate);
+  const animate = (time: number) => {
+    if (lastTimeRef.current == null) {
+      lastTimeRef.current = time;
+    }
+
+    const deltaMs = time - lastTimeRef.current;
+    lastTimeRef.current = time;
+
+    const pxPerSecond = zoomConfig[zoom].pxPerSecond;
+    const deltaPx = (deltaMs / 1000) * pxPerSecond;
+
+    setPlayHeadPosition((prev) => {
+      console.log({ prev, deltaMs, pxPerSecond,  deltaPx });
+      return prev + deltaPx;
+    });
+
+    rafIdRef.current = requestAnimationFrame(animate);
   };
 
   useEffect(() => {
     if (play) {
-      startAnimation();
+      console.log("play");
+      rafIdRef.current = requestAnimationFrame(animate);
     } else {
-      cancelAnimationFrame(animationFrameId.current);
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+      lastTimeRef.current = null;
     }
+
     return () => {
-      cancelAnimationFrame(animationFrameId.current);
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+      lastTimeRef.current = null;
     };
-  }, [play, timelineRef]);
+  }, [play, zoom]);
 
   // Handle dragging
   useEffect(() => {
@@ -38,10 +59,14 @@ export default function Playhead({ play, timelineRef }: PlayheadProps) {
     const handleMouseMove = (e: MouseEvent) => {
       if (timelineRef.current) {
         const rect = timelineRef.current.getBoundingClientRect();
-        const newPosition = e.clientX - rect.left;
-        
-        // Clamp position within timeline bounds
-        const clampedPosition = Math.max(0, Math.min(newPosition, rect.width));
+        const scrollLeft = timelineRef.current.scrollLeft;
+        const scrollWidth = timelineRef.current.scrollWidth;
+
+        // Calculate position relative to the scrollable content (not just visible area)
+        const newPosition = e.clientX - rect.left + scrollLeft;
+
+        // Clamp position within timeline bounds (use scrollWidth for full scrollable width)
+        const clampedPosition = Math.max(0, Math.min(newPosition, scrollWidth));
         setPlayHeadPosition(clampedPosition);
       }
     };
