@@ -7,10 +7,11 @@ import {
   minTimelineSeconds,
 } from "./store/TimelineStore";
 import Playhead from "./components/Playhead";
+import { formatTime } from "../../Utills/commonUtils";
 
 export default function Timeline() {
   const timelineRef = useRef<HTMLDivElement | null>(null);
-  const { zoom, setZoom, play, setPlay } = useTimelineStore();
+  const { zoom, setZoom, play, setPlay, elapsedTime } = useTimelineStore();
   const [ticks, setTicks] = useState<React.ReactElement[]>([]);
 
   // Format time based on majorTickSeconds
@@ -147,6 +148,7 @@ export default function Timeline() {
         <button onClick={() => setPlay(!play)}>
           {play ? "Pause" : "Play"}
         </button>
+        <p>Elapsed Time: {formatTime(elapsedTime)}</p>
       </div>
 
       {/* Timeline Area */}

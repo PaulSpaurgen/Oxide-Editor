@@ -43,12 +43,15 @@ export type MediaItem = {
   id: string;
   start: number;
   end: number;
+  duration: number;
 };
 
 interface TimelineStore {
   play: boolean;
   zoom: ZoomLevel;
   playHeadPosition: number;
+  elapsedTime: number;
+  setElapsedTime: (elapsedTime: number | ((prev: number) => number)) => void;
   setZoom: (zoom: ZoomLevel) => void;
   setPlay: (play: boolean) => void;
   setPlayHeadPosition: (playHeadPosition: number | ((prev: number) => number)) => void;
@@ -57,6 +60,13 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
   play: false,
   zoom: 3,
   playHeadPosition: 0,  
+  elapsedTime: 0,
+  setElapsedTime: (elapsedTime: number | ((prev: number) => number)) => 
+    set((state) => ({
+      elapsedTime: typeof elapsedTime === 'function' 
+        ? elapsedTime(state.elapsedTime) 
+        : elapsedTime
+    })),
   setZoom: (zoom: ZoomLevel) => set({ zoom }),
   setPlay: (play: boolean) => set({ play }),
   setPlayHeadPosition: (playHeadPosition: number | ((prev: number) => number)) => 
