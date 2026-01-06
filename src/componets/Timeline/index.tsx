@@ -12,7 +12,7 @@ import MediaTrack from "./components/MediaTrack";
 
 export default function Timeline() {
   const timelineRef = useRef<HTMLDivElement | null>(null);
-  const { zoom, setZoom, play, setPlay, elapsedTime } = useTimelineStore();
+  const { zoom, setZoom, play, setPlay, elapsedTime, setPlayHeadPosition, setElapsedTime } = useTimelineStore();
   const [ticks, setTicks] = useState<React.ReactElement[]>([]);
 
   // Format time based on majorTickSeconds
@@ -133,6 +133,14 @@ export default function Timeline() {
     };
   }, [drawTicks]);
 
+  const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Todo 
+    // 1. When the timeline is scrolled to the left or right, the playhead should be positioned at the correct position
+    e.preventDefault();
+    setPlayHeadPosition(e.clientX-16);
+    setElapsedTime((e.clientX-16) / zoomConfig[zoom].pxPerSecond * 1000);
+  };
+
   return (
     <div className="w-full bg-neutral-900 text-white select-none">
       {/* Zoom Slider */}
@@ -160,7 +168,7 @@ export default function Timeline() {
           ref={timelineRef}
           className="w-full h-72 overflow-x-auto relative bg-neutral-800 "
         >
-          <div className="flex " style={{ minWidth: "100%" }}>
+          <div className="flex " onClick={handleTimelineClick}>
             {ticks}
           </div>
           <Playhead play={play} timelineRef={timelineRef as React.RefObject<HTMLDivElement>} />

@@ -6,17 +6,16 @@ export default function MediaTrack({
 }: {
   timelineRef: React.RefObject<HTMLDivElement>;
 }) {
-  const { mediaItems, zoom } = useTimelineStore();
+  const { mediaItems, zoom, setMediaItems } = useTimelineStore();
   const dragItemRef = useRef<HTMLDivElement>(null);
   const currentSelectedItemRef = useRef<HTMLDivElement>(null);
-  const mouseMOvementoffsetRef = useRef(0);
+  const mouseMovementoffsetRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
-
 
   const onmousedown = (e: React.MouseEvent<HTMLDivElement>) => {
     dragItemRef.current = e.target as HTMLDivElement;
     dragItemRef.current.style.zIndex = "1000";
-    mouseMOvementoffsetRef.current =
+    mouseMovementoffsetRef.current =
       e.clientX -
       (dragItemRef.current as HTMLDivElement).getBoundingClientRect().left;
     setIsDragging(true);
@@ -25,18 +24,35 @@ export default function MediaTrack({
   const handleMouseMove = (e: MouseEvent) => {
     if (dragItemRef.current) {
       dragItemRef.current.style.left = `${
-        e.clientX - mouseMOvementoffsetRef.current
+        e.clientX - mouseMovementoffsetRef.current
       }px`;
     }
   };
 
   const handleMouseUp = (e: MouseEvent) => {
+    
     setIsDragging(false);
     if (dragItemRef.current) {
       dragItemRef.current.style.zIndex = "1";
     }
-    
- 
+    const itemId = (e.target as HTMLDivElement).dataset.id;
+    // ToDo: 
+    // 1. new start is less than 0, set it to 0
+    // 2. Search for nearest safe position in the array and set the new start to that position
+    // 3. If there is a nearest end position, set the new start to that position
+    const updatedMediaItems = mediaItems.map((item) => {
+      if (item.id === itemId) {
+        const newStart = (e.clientX - mouseMovementoffsetRef.current) / zoomConfig[zoom].pxPerSecond * 1000;
+        console.log(Math.max(0, newStart));
+        
+        return {
+          ...item,
+          start: newStart < 0 ? 0 : newStart,
+        };
+      }
+      return item;
+    });
+    setMediaItems(updatedMediaItems);
   };
 
   useEffect(() => {
@@ -50,9 +66,7 @@ export default function MediaTrack({
     };
   }, [isDragging]);
 
-  const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
-  
-  };
+  const onClick = (e: React.MouseEvent<HTMLDivElement>) => {};
 
   return (
     <div
