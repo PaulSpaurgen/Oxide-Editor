@@ -1,5 +1,5 @@
 import { create } from "zustand";
-
+import { dummyMediaItems } from "./data";
 export const zoomPxMultiple = 100;
 export const minTimelineSeconds = 300;
 
@@ -40,10 +40,11 @@ export const zoomConfig = {
 export type ZoomLevel = keyof typeof zoomConfig;
 
 export type MediaItem = {
-  id: string;
-  start: number;
-  end: number;
-  duration: number;
+  id: string; // unique id
+  start: number; // in milliseconds
+  end: number; // in milliseconds
+  duration: number; // in milliseconds
+  type: "video" | "audio";
 };
 
 interface TimelineStore {
@@ -51,6 +52,8 @@ interface TimelineStore {
   zoom: ZoomLevel;
   playHeadPosition: number;
   elapsedTime: number;
+  mediaItems: MediaItem[];
+  setMediaItems: (mediaItems: MediaItem[]) => void;
   setElapsedTime: (elapsedTime: number | ((prev: number) => number)) => void;
   setZoom: (zoom: ZoomLevel) => void;
   setPlay: (play: boolean) => void;
@@ -61,6 +64,8 @@ export const useTimelineStore = create<TimelineStore>((set) => ({
   zoom: 3,
   playHeadPosition: 0,  
   elapsedTime: 0,
+  mediaItems: dummyMediaItems as MediaItem[],
+  setMediaItems: (mediaItems: MediaItem[]) => set({ mediaItems }),
   setElapsedTime: (elapsedTime: number | ((prev: number) => number)) => 
     set((state) => ({
       elapsedTime: typeof elapsedTime === 'function' 

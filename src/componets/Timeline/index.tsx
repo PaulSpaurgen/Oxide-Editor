@@ -8,6 +8,7 @@ import {
 } from "./store/TimelineStore";
 import Playhead from "./components/Playhead";
 import { formatTime } from "../../Utills/commonUtils";
+import MediaTrack from "./components/MediaTrack";
 
 export default function Timeline() {
   const timelineRef = useRef<HTMLDivElement | null>(null);
@@ -78,7 +79,9 @@ export default function Timeline() {
             minWidth: `${gap}px`,
             borderLeft: "1px solid white",
             position: "relative",
+            backgroundColor: "gray",
             flexShrink: 0,
+            minHeight: "20px",
           }}
         >
           {shouldShowLabel && (
@@ -157,10 +160,11 @@ export default function Timeline() {
           ref={timelineRef}
           className="w-full h-72 overflow-x-auto relative bg-neutral-800 "
         >
-          <div className="flex" style={{ minWidth: "100%" }}>
+          <div className="flex " style={{ minWidth: "100%" }}>
             {ticks}
           </div>
           <Playhead play={play} timelineRef={timelineRef as React.RefObject<HTMLDivElement>} />
+          <MediaTrack timelineRef={timelineRef as React.RefObject<HTMLDivElement>} />
           {/* Timeline Inner Content */}
         </div>
       </div>

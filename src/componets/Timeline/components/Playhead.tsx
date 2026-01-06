@@ -204,7 +204,7 @@ export default function Playhead({ play, timelineRef }: PlayheadProps) {
 
   return (
     <div
-      className="absolute top-0 left-0 w-1 h-full bg-red-500 cursor-ew-resize"
+      className="absolute top-0 left-0 w-1 h-full bg-red-500 cursor-ew-resize z-10"
       style={{ left: `${playHeadPosition}px` }}
       onMouseDown={handleMouseDown}
       ref={playheadRef}
